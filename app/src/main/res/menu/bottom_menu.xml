@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cnb_unselectedColor="@color/unselect_icons">
+
+    <item
+        android:id="@+id/map"
+        android:enabled="true"
+        android:icon="@drawable/ic_map"
+        android:title="@string/map"
+        app:cnb_iconColor="@color/blue_icons"
+        app:cnb_iconTintMode="src_in"
+        app:cnb_textColor="@color/blue_icons" />
+
+    <item
+        android:id="@+id/bluetooth"
+        android:enabled="true"
+        android:icon="@drawable/ic_bluetooth"
+        android:title="@string/bluetooth"
+        app:cnb_iconColor="@color/blue_icons"
+        app:cnb_iconTintMode="src_in"
+        app:cnb_textColor="@color/blue_icons" />
+
+</menu>

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">TRACKnSCAN</string>
+
+    <string name="map">Map Tracking</string>
+    <string name="bluetooth">Bluetooth Scan</string>
+
 </resources>
