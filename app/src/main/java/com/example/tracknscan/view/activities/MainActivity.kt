@@ -1,4 +1,4 @@
-package com.example.tracknscan.activities
+package com.example.tracknscan.view.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

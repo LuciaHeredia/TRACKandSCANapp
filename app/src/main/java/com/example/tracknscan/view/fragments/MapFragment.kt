@@ -1,4 +1,4 @@
-package com.example.tracknscan.fragments
+package com.example.tracknscan.view.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.tracknscan.R
 
-class BluetoothFragment : Fragment() {
+class MapFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,7 +18,8 @@ class BluetoothFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_bluetooth, container, false)
+        return inflater.inflate(R.layout.fragment_map, container, false)
     }
+
 
 }

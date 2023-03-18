@@ -1,7 +1,16 @@
 <resources>
-    <string name="app_name">TRACKnSCAN</string>
+    <string name="app_name">TRACK and SCAN</string>
 
-    <string name="map">Map Tracking</string>
-    <string name="bluetooth">Bluetooth Scan</string>
+    <!-- Bottom Menu -->
+    <string name="map_opt">Map Tracking</string>
+    <string name="bluetooth_opt">Bluetooth Scan</string>
+
+    <!-- Bluetooth Page -->
+    <string name="bluetooth_desc_text">Scanning for Bluetooth devices</string>
+    <string name="filter_by_text">Filter by mac address…</string>
+    <string name="filter_btn">Filter</string>
+
+    <!-- Map Page -->
+
 
 </resources>
