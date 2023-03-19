@@ -53,6 +53,7 @@
         app:layout_constraintTop_toBottomOf="@+id/b_desc_text" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/b_back_grey"

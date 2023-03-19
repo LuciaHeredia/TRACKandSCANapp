@@ -1,6 +1,7 @@
 package com.example.tracknscan.view.fragments
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -14,11 +15,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.tracknscan.databinding.FragmentBluetoothBinding
 import com.example.tracknscan.helpers.Constants
+import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceModel
+import com.example.tracknscan.model.bluetoothScan.DevicesAdapter
+import com.example.tracknscan.model.bluetoothScan.data.AndroidBluetoothController
 import com.example.tracknscan.view.activities.MainActivity
 import com.example.tracknscan.viewModel.BluetoothViewModel
+import com.example.tracknscan.viewModel.BluetoothViewModelFactory
 
 
 class BluetoothFragment : Fragment() {
@@ -26,7 +33,7 @@ class BluetoothFragment : Fragment() {
     private var _binding: FragmentBluetoothBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel by activityViewModels<BluetoothViewModel>()
+    private lateinit var viewModel: BluetoothViewModel
 
     private val bluetoothManager by lazy {
         requireContext().getSystemService(BluetoothManager::class.java)
@@ -38,20 +45,34 @@ class BluetoothFragment : Fragment() {
     private val isBluetoothEnabled: Boolean
         get() = bluetoothAdapter?.isEnabled == true
 
+    lateinit var devicesAdapter: DevicesAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+
+        // ViewModelFactory to pass input data to the ViewModel
+        viewModel = ViewModelProvider(this, BluetoothViewModelFactory(AndroidBluetoothController(requireContext())))[BluetoothViewModel::class.java]
+
         _binding = FragmentBluetoothBinding
             .inflate(inflater, container, false)
             .apply {
                 this.vm = viewModel
             }
 
-        if(!isBluetoothEnabled) // bluetooth disabled -> ask user to turn on
-            askBluetoothPermission()
+        initRecyclerView()
+        askBluetoothPermission()
+        observeNewDevicesScanned()
 
         return binding.root
+    }
+
+    private fun initRecyclerView(){
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            devicesAdapter = DevicesAdapter()
+            adapter = devicesAdapter
+        }
     }
 
     private fun askBluetoothPermission() {
@@ -69,19 +90,27 @@ class BluetoothFragment : Fragment() {
             }
         }
 
-        // register for result - Scan Permission
+        // register for result - Permissions(connect+scan)
         val permissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
+            ActivityResultContracts.RequestMultiplePermissions()
         ) {
-            enableBluetoothLauncher.launch(
-                Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            )
+            if( !isBluetoothEnabled) {
+                // bluetooth disabled -> ask user to turn on
+                enableBluetoothLauncher.launch(
+                    Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                )
+            } else {
+                viewModel.startScanning()
+            }
         }
 
-        // bluetooth scan capability ON (enabled from SDK >= 31)
+        // bluetooth connect+scan capability ON (enabled from SDK >= 31)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissionLauncher.launch(
-                Manifest.permission.BLUETOOTH_SCAN
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                )
             )
         }
 
@@ -98,6 +127,15 @@ class BluetoothFragment : Fragment() {
             activity, "Bluetooth not enabled, try again later.",
             Toast.LENGTH_SHORT
         ).show()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun observeNewDevicesScanned() {
+        viewModel.state.observe(viewLifecycleOwner
+        ) { devices ->
+            devicesAdapter.setDevicesList(devices)
+            devicesAdapter.notifyDataSetChanged()
+        }
     }
 
     override fun onDestroyView() {
