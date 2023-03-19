@@ -1,18 +1,18 @@
 package com.example.tracknscan.model.bluetoothScan.data
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceModel
 
 @SuppressLint("MissingPermission")
 class AndroidBluetoothController(private val context: Context){
+
+    var discoveryStarted: Boolean = false
 
     // to get device's data
     private val bluetoothManager by lazy {
@@ -43,9 +43,7 @@ class AndroidBluetoothController(private val context: Context){
 
 
     fun startDiscovery() {
-        if(!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
-            return
-        }
+        discoveryStarted = true
 
         // registration for device scan result
         context.registerReceiver(
@@ -57,21 +55,24 @@ class AndroidBluetoothController(private val context: Context){
     }
 
     fun stopDiscovery() {
-        if(!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
-            return
-        }
-
         bluetoothAdapter?.cancelDiscovery() // stop scanning for devices
+    }
+
+    fun filterListByAddress(address: String) {
+        if(address.isNotEmpty()){
+            stopDiscovery()
+            _scannedDevices.value = scannedDevicesSaved.filter {
+                (it.address.lowercase()).contains(address.lowercase())
+            }
+        } else {
+            startDiscovery()
+        }
     }
 
     fun release() {
         // stop receiving updates of scan
-        context.unregisterReceiver(foundDeviceReceiver)
-    }
-
-    private fun hasPermission(permission: String): Boolean {
-        // permission to use bluetooth
-        return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+        if(discoveryStarted)
+            context.unregisterReceiver(foundDeviceReceiver)
     }
 
 }

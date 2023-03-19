@@ -12,12 +12,20 @@ class BluetoothViewModel(
     val state = bluetoothController.scannedDevices
 
     fun startScanning() {
-        Log.i("BluetoothViewModel", "startScanning")
         bluetoothController.startDiscovery()
     }
 
     fun stopScanning() {
         bluetoothController.stopDiscovery()
+    }
+
+    fun filterList(address: String) {
+        Log.i("BluetoothViewModel", "filterList")
+        bluetoothController.filterListByAddress(address)
+    }
+
+    fun releaseDataReceiver(){
+        bluetoothController.release()
     }
 
 }

@@ -37,12 +37,12 @@
         android:inputType="text"
         android:textColor="@color/black"
         android:textColorHint="@color/unselect_icons"
-        app:layout_constraintEnd_toStartOf="@+id/button"
+        app:layout_constraintEnd_toStartOf="@+id/b_filter_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/b_desc_text" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/b_filter_button"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_marginTop="20dp"
@@ -51,6 +51,15 @@
         android:text="@string/filter_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/b_desc_text" />
+
+    <ProgressBar
+        android:id="@+id/b_progressBar"
+        android:layout_height="30dp"
+        android:layout_width="30dp"
+        android:translationZ="90dp"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/b_filter_text" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

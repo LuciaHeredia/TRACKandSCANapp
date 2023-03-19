@@ -12,15 +12,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.tracknscan.databinding.FragmentBluetoothBinding
 import com.example.tracknscan.helpers.Constants
-import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceModel
 import com.example.tracknscan.model.bluetoothScan.DevicesAdapter
 import com.example.tracknscan.model.bluetoothScan.data.AndroidBluetoothController
 import com.example.tracknscan.view.activities.MainActivity
@@ -45,7 +44,9 @@ class BluetoothFragment : Fragment() {
     private val isBluetoothEnabled: Boolean
         get() = bluetoothAdapter?.isEnabled == true
 
-    lateinit var devicesAdapter: DevicesAdapter
+    private lateinit var devicesAdapter: DevicesAdapter
+
+    var spinner: ProgressBar? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -63,6 +64,7 @@ class BluetoothFragment : Fragment() {
         initRecyclerView()
         askBluetoothPermission()
         observeNewDevicesScanned()
+        filterButtonListener()
 
         return binding.root
     }
@@ -73,6 +75,33 @@ class BluetoothFragment : Fragment() {
             devicesAdapter = DevicesAdapter()
             adapter = devicesAdapter
         }
+
+        // init progress bar
+        spinner = binding.bProgressBar
+        spinner!!.visibility = View.GONE
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun observeNewDevicesScanned() {
+        viewModel.state.observe(viewLifecycleOwner
+        ) { devices ->
+            devicesAdapter.setDevicesList(devices)
+            devicesAdapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun filterButtonListener() {
+        binding.bFilterButton.setOnClickListener {
+            val addressToFilter = binding.bFilterText.text.toString()
+
+            if(addressToFilter.isEmpty()) {
+                spinner?.visibility = View.VISIBLE // show progress bar
+            } else {
+                spinner!!.visibility = View.GONE // hide progress bar
+            }
+
+            viewModel.filterList(addressToFilter)
+        }
     }
 
     private fun askBluetoothPermission() {
@@ -82,6 +111,7 @@ class BluetoothFragment : Fragment() {
             ActivityResultContracts.StartActivityForResult()) { result ->
             when (result.resultCode) {
                 RESULT_OK -> {
+                    spinner?.visibility = View.VISIBLE // show progress bar
                     viewModel.startScanning()
                 }
                 else -> {
@@ -100,6 +130,7 @@ class BluetoothFragment : Fragment() {
                     Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 )
             } else {
+                spinner?.visibility = View.VISIBLE // show progress bar
                 viewModel.startScanning()
             }
         }
@@ -129,18 +160,11 @@ class BluetoothFragment : Fragment() {
         ).show()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun observeNewDevicesScanned() {
-        viewModel.state.observe(viewLifecycleOwner
-        ) { devices ->
-            devicesAdapter.setDevicesList(devices)
-            devicesAdapter.notifyDataSetChanged()
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        viewModel.stopScanning()
+        viewModel.releaseDataReceiver()
     }
 
 
