@@ -2,11 +2,14 @@ package com.example.tracknscan.view.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.tracknscan.R
 import com.ismaeldivita.chipnavigation.ChipNavigationBar
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var navController: NavController
 
     private val menu by lazy { findViewById<ChipNavigationBar>(R.id.bottom_menu_bar) }
 
@@ -21,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private fun initNavigationAndMenu() {
         // Navigation
         val navigationHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navigationHost.navController
+        navController = navigationHost.navController
 
         // Bottom Menu
         menu.setItemSelected(R.id.map,true) // init tapped item
@@ -35,6 +38,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+    }
+
+    fun backToFrag( id: Int) {
+        menu.setItemSelected(id,true)
     }
 
 }
