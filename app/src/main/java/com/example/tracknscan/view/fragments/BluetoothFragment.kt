@@ -13,16 +13,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tracknscan.databinding.FragmentBluetoothBinding
-import com.example.tracknscan.helpers.Constants
+import com.example.tracknscan.helpers.throwToast
 import com.example.tracknscan.model.bluetoothScan.DevicesAdapter
-import com.example.tracknscan.model.bluetoothScan.data.AndroidBluetoothController
-import com.example.tracknscan.view.activities.MainActivity
+import com.example.tracknscan.model.bluetoothScan.data.BluetoothController
 import com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModel
 import com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModelFactory
 
@@ -53,7 +51,7 @@ class BluetoothFragment : Fragment() {
     ): View {
 
         // ViewModelFactory to pass input data to the ViewModel
-        viewModel = ViewModelProvider(this, BluetoothViewModelFactory(AndroidBluetoothController(requireContext())))[BluetoothViewModel::class.java]
+        viewModel = ViewModelProvider(this, BluetoothViewModelFactory(BluetoothController(requireContext())))[BluetoothViewModel::class.java]
 
         _binding = FragmentBluetoothBinding
             .inflate(inflater, container, false)
@@ -83,7 +81,7 @@ class BluetoothFragment : Fragment() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun observeNewDevicesScanned() {
-        viewModel.state.observe(viewLifecycleOwner
+        viewModel.devicesToShow.observe(viewLifecycleOwner
         ) { devices ->
             devicesAdapter.setDevicesList(devices)
             devicesAdapter.notifyDataSetChanged()
@@ -149,15 +147,9 @@ class BluetoothFragment : Fragment() {
 
     private fun bluetoothResultCanceled() {
         // User did not enable Bluetooth or an error occurred
-        Log.d("Bluetooth", "BT not enabled")
+        Log.d("Bluetooth", "Bluetooth not enabled")
 
-        // go to Map Fragment
-        (activity as MainActivity?)!!.backToFrag(Constants.mapIdFragment)
-
-        Toast.makeText(
-            activity, "Bluetooth not enabled, try again later.",
-            Toast.LENGTH_SHORT
-        ).show()
+        throwToast(requireContext(), "Bluetooth not enabled, try again later.")
     }
 
     override fun onDestroyView() {

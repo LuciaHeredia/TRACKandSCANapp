@@ -2,10 +2,10 @@ package com.example.tracknscan.viewModel.bluetoothScan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.tracknscan.model.bluetoothScan.data.AndroidBluetoothController
+import com.example.tracknscan.model.bluetoothScan.data.BluetoothController
 
 class BluetoothViewModelFactory(
-    private val bluetoothController: AndroidBluetoothController
+    private val bluetoothController: BluetoothController
 ):  ViewModelProvider.Factory  {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

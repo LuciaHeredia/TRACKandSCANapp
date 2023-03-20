@@ -1,21 +1,26 @@
 package com.example.tracknscan.view.fragments
 
-import android.location.Location
+import android.Manifest
+import android.content.Intent
+import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.tracknscan.R
 import com.example.tracknscan.databinding.FragmentMapBinding
+import com.example.tracknscan.helpers.throwToast
+import com.example.tracknscan.model.mapTracking.data.MapController
 import com.example.tracknscan.viewModel.mapTracking.MapViewModel
+import com.example.tracknscan.viewModel.mapTracking.MapViewModelFactory
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
@@ -26,17 +31,27 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var viewModel: MapViewModel
 
+    private val locationManager by lazy {
+        requireContext().getSystemService(LocationManager::class.java)
+    }
+
+    private val isLocationEnabled: Boolean
+        get() = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
     private lateinit var mMap: GoogleMap
 
-    private lateinit var currentLocation: Location
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private val permissionCode = 101
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
 
-        viewModel = ViewModelProvider(this)[MapViewModel::class.java]
+        // location service
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        // ViewModelFactory to pass input data to the ViewModel
+        viewModel = ViewModelProvider(this, MapViewModelFactory(MapController(requireContext(), fusedLocationProviderClient)))[MapViewModel::class.java]
 
         _binding = FragmentMapBinding
             .inflate(inflater, container, false)
@@ -48,17 +63,53 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)*/
 
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-
-        initMapTracking()
+        askLocationPermission()
+        observeLocationsList()
 
         return binding.root
     }
 
-    private fun initMapTracking() {
-        // if first time app opened:
-        viewModel.getCurrentLocationUser()
+    private fun askLocationPermission() {
+
+        // register for result - checking if user enabled Location
+        val enableLocationLauncher = registerForActivityResult(
+             ActivityResultContracts.StartActivityForResult()) {
+            if(!isLocationEnabled) {
+                locationResultCanceled()
+            } else {
+                viewModel.getCurrentLocationUser()
+            }
+         }
+
+         // register for result - Permissions(location)
+         val permissionLauncher = registerForActivityResult(
+             ActivityResultContracts.RequestMultiplePermissions()
+         ) {
+             if(!isLocationEnabled) {
+                 // location disabled -> ask user to turn on
+                 enableLocationLauncher.launch(
+                     Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                 )
+                 throwToast(requireContext(), "Enable location to continue.")
+             } else {
+                 viewModel.getCurrentLocationUser()
+             }
+         }
+
+        // LOCATION capability's ON
+        permissionLauncher.launch(
+             arrayOf(
+                 Manifest.permission.ACCESS_COARSE_LOCATION,
+                 Manifest.permission.ACCESS_FINE_LOCATION
+             )
+         )
+    }
+
+    private fun observeLocationsList() {
+        viewModel.locationsToShow.observe(viewLifecycleOwner
+        ) { locations ->
+            Log.d("Map", locations.listIterator().toString())
+        }
     }
 
     /**
@@ -82,6 +133,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
     }
 
-
+    private fun locationResultCanceled() {
+        // User did not enable Location or an error occurred
+        Log.d("Location", "Location not enabled")
+        throwToast(requireContext(), "Location not enabled, try again later.",)
+    }
 
 }

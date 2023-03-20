@@ -9,9 +9,9 @@ import com.example.tracknscan.R
 
 class DevicesAdapter: RecyclerView.Adapter<DevicesAdapter.MyViewHolder>() {
 
-    private var devicesList: List<BluetoothDeviceModel> = emptyList()
+    private var devicesList: List<BluetoothDeviceDomain> = emptyList()
 
-    fun setDevicesList(data: List<BluetoothDeviceModel>) {
+    fun setDevicesList(data: List<BluetoothDeviceDomain>) {
         this.devicesList = data
     }
 
@@ -34,7 +34,7 @@ class DevicesAdapter: RecyclerView.Adapter<DevicesAdapter.MyViewHolder>() {
 
         private val deviceData: TextView = view.findViewById(R.id.device_data_text)
 
-        fun bind(device: BluetoothDeviceModel) {
+        fun bind(device: BluetoothDeviceDomain) {
             var dName = "null"
             val dAddress: String = device.address
 

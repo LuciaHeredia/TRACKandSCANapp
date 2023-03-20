@@ -7,10 +7,12 @@ import android.content.Context
 import android.content.IntentFilter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceModel
+import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceDomain
 
 @SuppressLint("MissingPermission")
-class AndroidBluetoothController(private val context: Context){
+class BluetoothController(
+    private val context: Context
+    ){
 
     var discoveryStarted: Boolean = false
 
@@ -23,12 +25,12 @@ class AndroidBluetoothController(private val context: Context){
     }
 
     // MutableLiveData - value of the data stored within it can be changed
-    private val _scannedDevices = MutableLiveData<List<BluetoothDeviceModel>>(emptyList())
+    private val _scannedDevices = MutableLiveData<List<BluetoothDeviceDomain>>(emptyList())
     // wrap data with LiveData
-    val scannedDevices: LiveData<List<BluetoothDeviceModel>>
+    val scannedDevices: LiveData<List<BluetoothDeviceDomain>>
         get() = _scannedDevices
 
-    var scannedDevicesSaved: List<BluetoothDeviceModel> = emptyList()
+    var scannedDevicesSaved: List<BluetoothDeviceDomain> = emptyList()
 
     // put the new device scanned in the Mutable LiveData variable
     private val foundDeviceReceiver = FoundDeviceReceiver { device ->
