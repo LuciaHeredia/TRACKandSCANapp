@@ -6,7 +6,7 @@
     <data>
         <variable
             name="vm"
-            type="com.example.tracknscan.viewModel.BluetoothViewModel"/>
+            type="com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModel"/>
     </data>
 
 <androidx.constraintlayout.widget.ConstraintLayout

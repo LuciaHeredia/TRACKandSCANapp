@@ -1,4 +1,4 @@
-package com.example.tracknscan.viewModel
+package com.example.tracknscan.viewModel.bluetoothScan
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

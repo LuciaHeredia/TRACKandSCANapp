@@ -23,8 +23,8 @@ import com.example.tracknscan.helpers.Constants
 import com.example.tracknscan.model.bluetoothScan.DevicesAdapter
 import com.example.tracknscan.model.bluetoothScan.data.AndroidBluetoothController
 import com.example.tracknscan.view.activities.MainActivity
-import com.example.tracknscan.viewModel.BluetoothViewModel
-import com.example.tracknscan.viewModel.BluetoothViewModelFactory
+import com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModel
+import com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModelFactory
 
 
 class BluetoothFragment : Fragment() {
