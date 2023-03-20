@@ -1,18 +1,28 @@
 package com.example.tracknscan.view.fragments
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
+import com.example.tracknscan.R
 import com.example.tracknscan.databinding.FragmentMapBinding
+import com.example.tracknscan.helpers.hasLocationPermission
 import com.example.tracknscan.helpers.throwToast
+import com.example.tracknscan.model.mapTracking.LocationClient
 import com.example.tracknscan.model.mapTracking.data.MapController
 import com.example.tracknscan.viewModel.mapTracking.MapViewModel
 import com.example.tracknscan.viewModel.mapTracking.MapViewModelFactory
@@ -21,6 +31,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
@@ -45,7 +56,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         // location service
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
@@ -59,9 +70,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 this.vm = viewModel
             }
 
-        /*val mapFragment = supportFragmentManager
+        val mapFragment = childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)*/
+        mapFragment.getMapAsync(this)
 
         askLocationPermission()
         observeLocationsList()
@@ -73,70 +84,82 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // register for result - checking if user enabled Location
         val enableLocationLauncher = registerForActivityResult(
-             ActivityResultContracts.StartActivityForResult()) {
+            ActivityResultContracts.StartActivityForResult()) {
             if(!isLocationEnabled) {
                 locationResultCanceled()
             } else {
                 viewModel.getCurrentLocationUser()
             }
-         }
+        }
 
-         // register for result - Permissions(location)
-         val permissionLauncher = registerForActivityResult(
-             ActivityResultContracts.RequestMultiplePermissions()
-         ) {
-             if(!isLocationEnabled) {
-                 // location disabled -> ask user to turn on
-                 enableLocationLauncher.launch(
-                     Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                 )
-                 throwToast(requireContext(), "Enable location to continue.")
-             } else {
-                 viewModel.getCurrentLocationUser()
-             }
-         }
+        // register for result - Permissions(location)
+        val permissionLauncher  = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
 
-        // LOCATION capability's ON
-        permissionLauncher.launch(
-             arrayOf(
-                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                 Manifest.permission.ACCESS_FINE_LOCATION
-             )
-         )
+            val preciseLocationGranted = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+            } else true
+
+            val approximateLocationGranted = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            } else true
+
+            // permission to use location -> granted
+            if(preciseLocationGranted || approximateLocationGranted) {
+                if(!isLocationEnabled) {
+                    // location disabled -> ask user to turn on
+                    enableLocationLauncher.launch(
+                        Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    )
+                    throwToast(requireContext(), "Enable location to continue.")
+                } else {
+                    viewModel.getCurrentLocationUser()
+                }
+            } else {
+                throwToast(requireContext(), "Location permission denied, try again later.",)
+            }
+        }
+
+        // check whether app already has the permissions
+        permissionLauncher .launch(arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION))
+
     }
 
     private fun observeLocationsList() {
+
         viewModel.locationsToShow.observe(viewLifecycleOwner
         ) { locations ->
-            Log.d("Map", locations.listIterator().toString())
+            if(locations.isNotEmpty()) {
+                Log.d("LOCATIONS RECEIVED", locations.last().toString())
+            }
         }
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(
-            MarkerOptions()
-            .position(sydney)
-            .title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        // add marker on map
+        // val latLong = LatLng(currentLocation.latitude, currentLocation.longitude)
+        // val markerOptions = MarkerOptions().position(latLong).title("current Location")
+
+        //  mMap.animateCamera(CameraUpdateFactory.newLatLng(latLong))
+        //  mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLong, 7f))
+        // mMap.addMarker(markerOptions)
+
     }
 
     private fun locationResultCanceled() {
         // User did not enable Location or an error occurred
         Log.d("Location", "Location not enabled")
         throwToast(requireContext(), "Location not enabled, try again later.",)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
 }

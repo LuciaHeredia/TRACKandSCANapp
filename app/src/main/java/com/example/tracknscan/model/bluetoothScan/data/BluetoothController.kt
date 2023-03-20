@@ -1,10 +1,12 @@
 package com.example.tracknscan.model.bluetoothScan.data
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceDomain
@@ -45,6 +47,10 @@ class BluetoothController(
 
 
     fun startDiscovery() {
+        if(!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+            return
+        }
+
         discoveryStarted = true
 
         // registration for device scan result
@@ -57,6 +63,9 @@ class BluetoothController(
     }
 
     fun stopDiscovery() {
+        if(!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+            return
+        }
         bluetoothAdapter?.cancelDiscovery() // stop scanning for devices
     }
 
@@ -75,6 +84,10 @@ class BluetoothController(
         // stop receiving updates of scan
         if(discoveryStarted)
             context.unregisterReceiver(foundDeviceReceiver)
+    }
+
+    private fun hasPermission(permission: String): Boolean {
+        return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 
 }

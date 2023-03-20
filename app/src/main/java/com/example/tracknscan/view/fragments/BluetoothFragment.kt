@@ -2,8 +2,6 @@ package com.example.tracknscan.view.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity.RESULT_OK
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
 import android.os.Build
@@ -104,41 +102,54 @@ class BluetoothFragment : Fragment() {
 
     private fun askBluetoothPermission() {
 
-        // register for result - checking user's choice
+        // register for result - checking if user enabled bluetooth
         val enableBluetoothLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()) { result ->
-            when (result.resultCode) {
-                RESULT_OK -> {
-                    spinner?.visibility = View.VISIBLE // show progress bar
-                    viewModel.startScanning()
-                }
-                else -> {
-                    bluetoothResultCanceled()
-                }
-            }
-        }
-
-        // register for result - Permissions(connect+scan)
-        val permissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) {
-            if( !isBluetoothEnabled) {
-                // bluetooth disabled -> ask user to turn on
-                enableBluetoothLauncher.launch(
-                    Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                )
+            ActivityResultContracts.StartActivityForResult()) {
+            if(!isBluetoothEnabled) {
+                bluetoothResultCanceled()
             } else {
                 spinner?.visibility = View.VISIBLE // show progress bar
                 viewModel.startScanning()
             }
         }
 
-        // bluetooth connect+scan capability ON (enabled from SDK >= 31)
+        // register for result - Permissions(connect+scan)
+        val permissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            val bluetoothScanGranted = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissions[Manifest.permission.BLUETOOTH_SCAN] == true
+            } else true
+
+            val bluetoothConnectGranted = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                permissions[Manifest.permission.BLUETOOTH_CONNECT] == true
+            } else true
+
+            // permission to scan bluetooth devices -> granted
+            if(bluetoothScanGranted && bluetoothConnectGranted) {
+                if (!isBluetoothEnabled) {
+                    // bluetooth disabled -> ask user to turn on
+                    enableBluetoothLauncher.launch(
+                        Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)
+                    )
+                    throwToast(requireContext(), "Enable bluetooth to continue.")
+
+                } else {
+                    spinner?.visibility = View.VISIBLE // show progress bar
+                    viewModel.startScanning()
+                }
+            } else {
+                throwToast(requireContext(), "Bluetooth Scan permission denied, try again later.",)
+            }
+        }
+
+        // check whether app already has the permissions (enabled from SDK >= 31)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissionLauncher.launch(
                 arrayOf(
                     Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_CONNECT
                 )
             )
         }

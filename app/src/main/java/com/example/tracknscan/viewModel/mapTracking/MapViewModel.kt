@@ -13,7 +13,7 @@ class MapViewModel(
 
     fun getCurrentLocationUser() {
         Log.i("MapViewModel", "getCurrentLocationUser()")
-        mapController.getLocationUpdates(1000)
+        mapController.getLocationUpdates(10000L)
     }
 
 }
