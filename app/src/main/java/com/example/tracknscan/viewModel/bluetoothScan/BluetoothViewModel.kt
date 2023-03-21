@@ -20,7 +20,6 @@ class BluetoothViewModel(
     }
 
     fun filterList(address: String) {
-        Log.i("BluetoothViewModel", "filterList")
         bluetoothController.filterListByAddress(address)
     }
 
