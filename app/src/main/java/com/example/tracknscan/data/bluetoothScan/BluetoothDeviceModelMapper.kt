@@ -1,4 +1,4 @@
-package com.example.tracknscan.model.bluetoothScan.data
+package com.example.tracknscan.data.bluetoothScan
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice

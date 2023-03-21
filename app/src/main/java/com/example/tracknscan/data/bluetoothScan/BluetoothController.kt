@@ -7,17 +7,18 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceDomain
-import com.example.tracknscan.model.bluetoothScan.data.toBluetoothDeviceModel
 
 @SuppressLint("MissingPermission")
 class BluetoothController(
     private val context: Context
     ){
 
-    var discoveryStarted: Boolean = false
+    private var discoveryStarted: Boolean = false
 
     // to get device's data
     private val bluetoothManager by lazy {
@@ -33,7 +34,7 @@ class BluetoothController(
     val scannedDevices: LiveData<List<BluetoothDeviceDomain>>
         get() = _scannedDevices
 
-    var scannedDevicesSaved: List<BluetoothDeviceDomain> = emptyList()
+    private var scannedDevicesSaved: List<BluetoothDeviceDomain> = emptyList()
 
     // put the new device scanned in the Mutable LiveData variable
     private val foundDeviceReceiver = FoundDeviceReceiver { device ->
@@ -46,9 +47,9 @@ class BluetoothController(
         }
     }
 
-
+    @RequiresApi(Build.VERSION_CODES.S)
     fun startDiscovery() {
-        if(!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+        if(!hasBluetoothPermission()) {
             return
         }
 
@@ -63,13 +64,15 @@ class BluetoothController(
         bluetoothAdapter?.startDiscovery() // by a broadcast receiver: FoundDeviceReceiver
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun stopDiscovery() {
-        if(!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+        if(!hasBluetoothPermission()) {
             return
         }
         bluetoothAdapter?.cancelDiscovery() // stop scanning for devices
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun filterListByAddress(address: String) {
         if(address.isNotEmpty()){
             stopDiscovery()
@@ -87,8 +90,9 @@ class BluetoothController(
             context.unregisterReceiver(foundDeviceReceiver)
     }
 
-    private fun hasPermission(permission: String): Boolean {
-        return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun hasBluetoothPermission(): Boolean {
+        return context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
     }
 
 }
