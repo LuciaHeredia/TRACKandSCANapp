@@ -1,10 +1,7 @@
 package com.example.tracknscan.view.fragments
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -13,21 +10,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.tracknscan.R
 import com.example.tracknscan.databinding.FragmentMapBinding
-import com.example.tracknscan.helpers.hasLocationPermission
+import com.example.tracknscan.helpers.Constants
 import com.example.tracknscan.helpers.throwToast
-import com.example.tracknscan.model.mapTracking.LocationClient
-import com.example.tracknscan.model.mapTracking.data.MapController
+import com.example.tracknscan.model.mapTracking.service.LocationService
 import com.example.tracknscan.viewModel.mapTracking.MapViewModel
 import com.example.tracknscan.viewModel.mapTracking.MapViewModelFactory
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -50,19 +42,17 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         get() = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
-    private lateinit var mMap: GoogleMap
+    private var mMap: GoogleMap? = null
 
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private var allLocationsPoints = mutableListOf<LatLng>()
+    private var locationPoint = LatLng(0.0,0.0)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
 
-        // location service
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-
         // ViewModelFactory to pass input data to the ViewModel
-        viewModel = ViewModelProvider(this, MapViewModelFactory(MapController(requireContext(), fusedLocationProviderClient)))[MapViewModel::class.java]
+        viewModel = ViewModelProvider(this, MapViewModelFactory())[MapViewModel::class.java]
 
         _binding = FragmentMapBinding
             .inflate(inflater, container, false)
@@ -70,12 +60,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 this.vm = viewModel
             }
 
-        val mapFragment = childFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-
         askLocationPermission()
-        observeLocationsList()
 
         return binding.root
     }
@@ -88,7 +73,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             if(!isLocationEnabled) {
                 locationResultCanceled()
             } else {
-                viewModel.getCurrentLocationUser()
+                startLocationService()
             }
         }
 
@@ -112,12 +97,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     enableLocationLauncher.launch(
                         Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     )
-                    throwToast(requireContext(), "Enable location to continue.")
+                    throwToast(requireContext(), "Enable Location to continue.")
                 } else {
-                    viewModel.getCurrentLocationUser()
+                    startLocationService()
                 }
             } else {
-                throwToast(requireContext(), "Location permission denied, try again later.",)
+                throwToast(requireContext(), "Location permission denied, try again later.")
             }
         }
 
@@ -128,38 +113,55 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    private fun observeLocationsList() {
-
-        viewModel.locationsToShow.observe(viewLifecycleOwner
-        ) { locations ->
-            if(locations.isNotEmpty()) {
-                Log.d("LOCATIONS RECEIVED", locations.last().toString())
-            }
+    private fun startLocationService() {
+        Intent(requireContext(), LocationService::class.java).also {
+            it.action = Constants.ACTION_START
+            requireActivity().startService(it)
         }
+        subscribeToObservers()
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
 
-        // add marker on map
-        // val latLong = LatLng(currentLocation.latitude, currentLocation.longitude)
-        // val markerOptions = MarkerOptions().position(latLong).title("current Location")
+    private fun subscribeToObservers() {
+        LocationService.allLocationsPoints.observe(viewLifecycleOwner, Observer {
+            allLocationsPoints = it
+            addAllLocationToMap()
+        })
+    }
 
-        //  mMap.animateCamera(CameraUpdateFactory.newLatLng(latLong))
-        //  mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLong, 7f))
-        // mMap.addMarker(markerOptions)
+    private fun addAllLocationToMap() {
+        for(location in allLocationsPoints) {
+            locationPoint = location
 
+            // put marker on map
+            val mapFragment = childFragmentManager
+                .findFragmentById(R.id.map) as SupportMapFragment
+            mapFragment.getMapAsync(this)
+        }
     }
 
     private fun locationResultCanceled() {
         // User did not enable Location or an error occurred
         Log.d("Location", "Location not enabled")
-        throwToast(requireContext(), "Location not enabled, try again later.",)
+        throwToast(requireContext(), "Location not enabled, try again later.")
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+
+        if(locationPoint.latitude != 0.0 && locationPoint.longitude != 0.0) { // not default
+            val markerOptions =
+                MarkerOptions().position(locationPoint).title(locationPoint.toString())
+
+            mMap?.animateCamera(CameraUpdateFactory.newLatLng(locationPoint))
+            mMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(locationPoint, 20f))
+            mMap?.addMarker(markerOptions)
+        }
     }
 
 }

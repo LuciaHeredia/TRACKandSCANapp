@@ -19,6 +19,8 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -33,6 +35,12 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
 
+        <service
+            android:name=".model.mapTracking.service.LocationService"
+            android:foregroundServiceType="location"
+            android:enabled="true"
+            android:stopWithTask="false" />
+        
         <activity
             android:name=".view.activities.MainActivity"
             android:exported="true">
