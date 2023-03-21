@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.example.tracknscan.presentation.fragments.MapFragment"
+        android:name="com.example.tracknscan.ui.fragments.MapFragment"
         android:label="fragment_map"
         tools:layout="@layout/fragment_map" >
         <action
@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/bluetoothFragment"
-        android:name="com.example.tracknscan.presentation.fragments.BluetoothFragment"
+        android:name="com.example.tracknscan.ui.fragments.BluetoothFragment"
         android:label="fragment_bluetooth"
         tools:layout="@layout/fragment_bluetooth" >
         <action

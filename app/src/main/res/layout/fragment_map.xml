@@ -6,7 +6,7 @@
     <data>
         <variable
             name="vm"
-            type="com.example.tracknscan.viewModel.mapTracking.MapViewModel"/>
+            type="com.example.tracknscan.viewModel.locationTrack.MapViewModel"/>
     </data>
 
 <androidx.constraintlayout.widget.ConstraintLayout
