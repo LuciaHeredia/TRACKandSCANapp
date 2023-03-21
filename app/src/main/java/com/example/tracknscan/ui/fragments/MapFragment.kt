@@ -77,7 +77,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             ActivityResultContracts.StartActivityForResult()) {
             if(!requireContext().isLocationEnabled()) {
                 binding.mDescText.text = Constants.Map.ANNOUNCE_NO_LOCATION
-                throwToast(requireContext(), Constants.Map.THROW_LOCATION_NOT_ENABLED)
             } else {
                 binding.mDescText.text = Constants.Map.ANNOUNCE_TRACKING
                 startLocationService()
@@ -111,7 +110,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 }
             } else {
                 binding.mDescText.text = Constants.Map.ANNOUNCE_NO_PERMISSION
-                throwToast(requireContext(), Constants.Map.THROW_LOCATION_PERMISSION_DENIED)
             }
         }
 

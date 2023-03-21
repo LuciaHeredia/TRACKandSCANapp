@@ -1,6 +1,7 @@
 package com.example.tracknscan.helpers
 
 import android.Manifest
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
@@ -11,10 +12,9 @@ import androidx.core.content.ContextCompat
 
 @RequiresApi(Build.VERSION_CODES.S)
 fun Context.hasBluetoothPermission(): Boolean {
-    return ContextCompat.checkSelfPermission(
-        this,
-        Manifest.permission.BLUETOOTH_SCAN
-    ) == PackageManager.PERMISSION_GRANTED
+    val bluetoothManager = applicationContext.getSystemService(BluetoothManager::class.java)
+    val bluetoothAdapter = bluetoothManager?.adapter
+    return  bluetoothAdapter?.isEnabled == true
 }
 
 fun Context.hasLocationPermission(): Boolean {

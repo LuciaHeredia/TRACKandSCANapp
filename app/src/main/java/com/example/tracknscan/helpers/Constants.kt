@@ -1,13 +1,12 @@
 package com.example.tracknscan.helpers
 
-import com.example.tracknscan.R
-
 object Constants {
 
     object Bluetooth {
+        const val ANNOUNCE_SCANNING = "Scanning For Bluetooth Devices"
+        const val ANNOUNCE_NO_BLUETOOTH = "Bluetooth not enabled"
+        const val ANNOUNCE_NO_PERMISSION = "Bluetooth Permission denied"
         const val THROW_ENABLE_BLUETOOTH = "Enable bluetooth to continue."
-        const val THROW_BLUETOOTH_NOT_ENABLED = "Bluetooth not enabled, try again later."
-        const val THROW_BLUETOOTH_SCAN_PERMISSION_DENIED = "Bluetooth Scan permission denied, try again later."
     }
 
     object Map {
@@ -16,9 +15,7 @@ object Constants {
         const val ANNOUNCE_NOT_TRACKING = "No Permission/Location Disabled"
         const val ANNOUNCE_NO_LOCATION = "Location not enabled"
         const val ANNOUNCE_NO_PERMISSION = "Location Permission denied"
-        const val THROW_LOCATION_PERMISSION_DENIED = "Location Permission denied, try again later."
         const val THROW_ENABLE_LOCATION = "Enable Location to continue."
-        const val THROW_LOCATION_NOT_ENABLED = "Location not enabled, try again later."
 
         // Service
         const val ACTION_START = "ACTION_START"
@@ -35,7 +32,7 @@ object Constants {
         const val LAT_COLUMN = "LATITUDE"
         const val LON_COLUMN = "LONGITUDE"
 
-        const val db_size = 5 // 20
+        const val DB_SIZE = 5 // 20
 
         // MAP
         const val MARKER_ZOOM = 20f
