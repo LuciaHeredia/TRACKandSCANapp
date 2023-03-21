@@ -36,13 +36,13 @@
             android:value="${MAPS_API_KEY}" />
 
         <service
-            android:name=".model.mapTracking.service.LocationService"
+            android:name=".services.TrackingService"
             android:foregroundServiceType="location"
             android:enabled="true"
             android:stopWithTask="false" />
         
         <activity
-            android:name=".view.activities.MainActivity"
+            android:name=".presentation.activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,4 +1,4 @@
-package com.example.tracknscan.model.bluetoothScan
+package com.example.tracknscan.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tracknscan.R
+import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceDomain
 
 class DevicesAdapter: RecyclerView.Adapter<DevicesAdapter.MyViewHolder>() {
 

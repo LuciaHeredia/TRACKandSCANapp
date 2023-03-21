@@ -1,4 +1,4 @@
-package com.example.tracknscan.view.fragments
+package com.example.tracknscan.presentation.fragments
 
 import android.Manifest
 import android.content.Intent
@@ -17,7 +17,7 @@ import com.example.tracknscan.R
 import com.example.tracknscan.databinding.FragmentMapBinding
 import com.example.tracknscan.helpers.Constants
 import com.example.tracknscan.helpers.throwToast
-import com.example.tracknscan.model.mapTracking.service.LocationService
+import com.example.tracknscan.services.TrackingService
 import com.example.tracknscan.viewModel.mapTracking.MapViewModel
 import com.example.tracknscan.viewModel.mapTracking.MapViewModelFactory
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -114,7 +114,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun startLocationService() {
-        Intent(requireContext(), LocationService::class.java).also {
+        Intent(requireContext(), TrackingService::class.java).also {
             it.action = Constants.ACTION_START
             requireActivity().startService(it)
         }
@@ -123,7 +123,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
 
     private fun subscribeToObservers() {
-        LocationService.allLocationsPoints.observe(viewLifecycleOwner, Observer {
+        TrackingService.allLocationsPoints.observe(viewLifecycleOwner, Observer {
             allLocationsPoints = it
             addAllLocationToMap()
         })

@@ -1,4 +1,4 @@
-package com.example.tracknscan.view.fragments
+package com.example.tracknscan.presentation.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -17,8 +17,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.tracknscan.databinding.FragmentBluetoothBinding
 import com.example.tracknscan.helpers.throwToast
-import com.example.tracknscan.model.bluetoothScan.DevicesAdapter
-import com.example.tracknscan.model.bluetoothScan.data.BluetoothController
+import com.example.tracknscan.adapters.DevicesAdapter
+import com.example.tracknscan.data.bluetoothScan.BluetoothController
 import com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModel
 import com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModelFactory
 

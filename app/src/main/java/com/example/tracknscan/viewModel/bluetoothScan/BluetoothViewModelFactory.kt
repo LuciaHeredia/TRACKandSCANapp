@@ -2,7 +2,7 @@ package com.example.tracknscan.viewModel.bluetoothScan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.tracknscan.model.bluetoothScan.data.BluetoothController
+import com.example.tracknscan.data.bluetoothScan.BluetoothController
 
 class BluetoothViewModelFactory(
     private val bluetoothController: BluetoothController

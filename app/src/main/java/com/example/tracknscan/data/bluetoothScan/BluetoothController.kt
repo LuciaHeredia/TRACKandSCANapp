@@ -1,4 +1,4 @@
-package com.example.tracknscan.model.bluetoothScan.data
+package com.example.tracknscan.data.bluetoothScan
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.tracknscan.model.bluetoothScan.BluetoothDeviceDomain
+import com.example.tracknscan.model.bluetoothScan.data.toBluetoothDeviceModel
 
 @SuppressLint("MissingPermission")
 class BluetoothController(
