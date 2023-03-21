@@ -11,7 +11,7 @@
     <string name="filter_btn">Filter</string>
 
     <!-- Map Page -->
-    <string name="map_desc_text">Tracking Location Every 1min</string>
+    <string name="map_desc_text">Connecting..</string>
 
 
 </resources>
