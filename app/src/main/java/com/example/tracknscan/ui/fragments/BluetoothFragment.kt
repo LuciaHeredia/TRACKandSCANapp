@@ -1,17 +1,16 @@
-package com.example.tracknscan.presentation.fragments
+package com.example.tracknscan.ui.fragments
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,9 +18,10 @@ import com.example.tracknscan.databinding.FragmentBluetoothBinding
 import com.example.tracknscan.helpers.throwToast
 import com.example.tracknscan.adapters.DevicesAdapter
 import com.example.tracknscan.data.bluetoothScan.BluetoothController
+import com.example.tracknscan.helpers.Constants
+import com.example.tracknscan.helpers.hasBluetoothPermission
 import com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModel
 import com.example.tracknscan.viewModel.bluetoothScan.BluetoothViewModelFactory
-
 
 class BluetoothFragment : Fragment() {
 
@@ -30,20 +30,11 @@ class BluetoothFragment : Fragment() {
 
     private lateinit var viewModel: BluetoothViewModel
 
-    private val bluetoothManager by lazy {
-        requireContext().getSystemService(BluetoothManager::class.java)
-    }
-    private val bluetoothAdapter by lazy {
-        bluetoothManager?.adapter
-    }
-
-    private val isBluetoothEnabled: Boolean
-        get() = bluetoothAdapter?.isEnabled == true
-
     private lateinit var devicesAdapter: DevicesAdapter
 
-    var spinner: ProgressBar? = null
+    private var spinner: ProgressBar? = null
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -100,13 +91,14 @@ class BluetoothFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     private fun askBluetoothPermission() {
 
         // register for result - checking if user enabled bluetooth
         val enableBluetoothLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()) {
-            if(!isBluetoothEnabled) {
-                bluetoothResultCanceled()
+            if(!requireContext().hasBluetoothPermission()) {
+                throwToast(requireContext(), Constants.Bluetooth.THROW_BLUETOOTH_NOT_ENABLED)
             } else {
                 spinner?.visibility = View.VISIBLE // show progress bar
                 viewModel.startScanning()
@@ -128,19 +120,19 @@ class BluetoothFragment : Fragment() {
 
             // permission to scan bluetooth devices -> granted
             if(bluetoothScanGranted && bluetoothConnectGranted) {
-                if (!isBluetoothEnabled) {
+                if (!requireContext().hasBluetoothPermission()) {
                     // bluetooth disabled -> ask user to turn on
                     enableBluetoothLauncher.launch(
                         Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)
                     )
-                    throwToast(requireContext(), "Enable bluetooth to continue.")
+                    throwToast(requireContext(), Constants.Bluetooth.THROW_ENABLE_BLUETOOTH)
 
                 } else {
                     spinner?.visibility = View.VISIBLE // show progress bar
                     viewModel.startScanning()
                 }
             } else {
-                throwToast(requireContext(), "Bluetooth Scan permission denied, try again later.",)
+                throwToast(requireContext(), Constants.Bluetooth.THROW_BLUETOOTH_SCAN_PERMISSION_DENIED)
             }
         }
 
@@ -156,19 +148,11 @@ class BluetoothFragment : Fragment() {
 
     }
 
-    private fun bluetoothResultCanceled() {
-        // User did not enable Bluetooth or an error occurred
-        Log.d("Bluetooth", "Bluetooth not enabled")
-
-        throwToast(requireContext(), "Bluetooth not enabled, try again later.")
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
         viewModel.stopScanning()
         viewModel.releaseDataReceiver()
     }
-
 
 }

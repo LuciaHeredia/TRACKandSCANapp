@@ -1,4 +1,4 @@
-package com.example.tracknscan.presentation.activities
+package com.example.tracknscan.ui.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -38,10 +38,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-    }
-
-    fun backToFrag( id: Int) {
-        menu.setItemSelected(id,true)
     }
 
 }
