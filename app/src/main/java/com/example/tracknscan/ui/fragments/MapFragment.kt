@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -34,6 +35,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var viewModel: MapViewModel
 
+    private var spinner: ProgressBar? = null
     private var mMap: GoogleMap? = null
 
     private var isTracking = false
@@ -61,6 +63,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 this.vm = viewModel
             }
 
+        // init progress bar
+        spinner = binding.mProgressBar
+        spinner!!.visibility = View.GONE
+
         subscribeToObservers()
 
         if(!isTracking) {
@@ -71,6 +77,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun askLocationPermission() {
+        spinner!!.visibility = View.GONE
 
         // register for result - checking if user enabled Location
         val enableLocationLauncher = registerForActivityResult(
@@ -79,6 +86,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 binding.mDescText.text = Constants.Map.ANNOUNCE_NO_LOCATION
             } else {
                 binding.mDescText.text = Constants.Map.ANNOUNCE_TRACKING
+                spinner?.visibility = View.VISIBLE // show progress bar
                 startLocationService()
             }
         }
@@ -106,6 +114,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     throwToast(requireContext(), Constants.Map.THROW_ENABLE_LOCATION)
                 } else {
                     binding.mDescText.text = Constants.Map.ANNOUNCE_TRACKING
+                    spinner?.visibility = View.VISIBLE // show progress bar
                     startLocationService()
                 }
             } else {
