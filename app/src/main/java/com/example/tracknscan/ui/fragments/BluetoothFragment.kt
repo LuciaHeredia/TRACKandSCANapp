@@ -97,7 +97,7 @@ class BluetoothFragment : Fragment() {
         // register for result - checking if user enabled bluetooth
         val enableBluetoothLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()) {
-            if(!requireContext().hasBluetoothPermission()) {
+            if(requireContext().hasBluetoothPermission()) {
                 throwToast(requireContext(), Constants.Bluetooth.THROW_BLUETOOTH_NOT_ENABLED)
             } else {
                 spinner?.visibility = View.VISIBLE // show progress bar
@@ -120,7 +120,7 @@ class BluetoothFragment : Fragment() {
 
             // permission to scan bluetooth devices -> granted
             if(bluetoothScanGranted && bluetoothConnectGranted) {
-                if (!requireContext().hasBluetoothPermission()) {
+                if (requireContext().hasBluetoothPermission()) {
                     // bluetooth disabled -> ask user to turn on
                     enableBluetoothLauncher.launch(
                         Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS)
