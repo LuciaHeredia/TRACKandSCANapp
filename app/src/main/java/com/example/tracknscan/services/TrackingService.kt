@@ -3,7 +3,6 @@ package com.example.tracknscan.services
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -15,6 +14,7 @@ import com.example.tracknscan.model.locationTrack.LocationDomain
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import kotlinx.coroutines.*
+import java.util.*
 
 // LifecycleService for object observing
 class TrackingService: LifecycleService() {
@@ -26,7 +26,6 @@ class TrackingService: LifecycleService() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private val dbHelper = LocationDbHelper(this, null)
-
 
     companion object {
         val isTracking = MutableLiveData<Boolean>()
@@ -109,31 +108,38 @@ class TrackingService: LifecycleService() {
             super.onLocationResult(result)
             if(isTracking.value!!) {
                 result.locations.lastOrNull()?.let { location ->
-                    val id: String = location.latitude.toString()+","+location.longitude.toString()
-                    val pos = LocationDomain(id.filter { it.isDigit() }, location.latitude, location.longitude)
+                    val pos = LocationDomain(getId(), location.latitude, location.longitude)
                     addLocation(pos)
                 }
             }
         }
     }
 
+    fun getId(): String {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val seconds = calendar.get(Calendar.SECOND)
+        val milli = calendar.get(Calendar.MILLISECOND)
+        return "TIME(H:M:S:M)= $hour:$minute:$seconds:$milli"
+    }
+
     private fun addLocation(location: LocationDomain?) {
         location?.let {
             val pos = LocationDomain(location.id, location.latitude, location.longitude)
-            Log.d("db SIZE: ", (allLocationsPoints.value?.size?.plus(1)).toString())
-            // markers and db size bounds
-            /*if(allLocationsPoints.value?.size!! >= Constants.db_size-1) {
-                Log.d("Locationnn", allLocationsPoints.value!![0].toString())
-                deleteLocation.value = allLocationsPoints.value!![0]
-                dbHelper.deleteFirstLocation(deleteLocation.value!!)
-                allLocationsPoints.value?.removeFirst()
-            } else {*/
-                allLocationsPoints.value?.apply {
-                    add(pos)
-                    allLocationsPoints.postValue(this)
-               // }
-                dbHelper.addLocation(pos)
+
+            // db size bounds
+            if(allLocationsPoints.value?.size!! >= Constants.Map.DB_SIZE) {
+                deleteLocation.value = allLocationsPoints.value!!.first()
+                dbHelper.deleteFirstLocation(deleteLocation.value!!) // remove from db
+                allLocationsPoints.value?.removeFirst() // remove from list
             }
+            allLocationsPoints.value?.apply {
+                add(pos)
+                allLocationsPoints.postValue(this) // add to list
+            }
+            dbHelper.addLocation(pos) // add to db
+
         }
     }
 

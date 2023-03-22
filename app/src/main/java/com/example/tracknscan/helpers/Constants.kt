@@ -21,8 +21,8 @@ object Constants {
         const val ACTION_START = "ACTION_START"
         const val ACTION_PAUSE = "ACTION_PAUSE"
         const val ACTION_STOP = "ACTION_STOP"
-        const val LOCATION_UPDATE_INTERVAL: Long = 5000L // 5sec, 60000L=1min
-        const val FASTEST_LOCATION_INTERVAL: Long = 2000L // 2sec, 30000L=0.5min
+        const val LOCATION_UPDATE_INTERVAL: Long = 60000L // TEST: 10sec, 60000L=1min
+        const val FASTEST_LOCATION_INTERVAL: Long = 30000L // TEST: 5sec, 30000L=0.5min
 
         // DB
         const val DB_NAME = "TRACKnSCANdb"
@@ -32,7 +32,7 @@ object Constants {
         const val LAT_COLUMN = "LATITUDE"
         const val LON_COLUMN = "LONGITUDE"
 
-        const val DB_SIZE = 5 // 20
+        const val DB_SIZE = 20 // TEST: 5
 
         // MAP
         const val MARKER_ZOOM = 20f

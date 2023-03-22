@@ -40,7 +40,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private var isTracking = false
     private var allLocationsPoints = mutableListOf<LocationDomain>()
-    private var deleteMarker = LocationDomain("0.0",0.0,0.0)
 
     private var firstMarkersInit = true
     private var markerList:ArrayList<MarkerOptions> = ArrayList()
@@ -49,6 +48,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var globalLocation = LatLng(0.0,0.0)
     private var globalMarkerOptions =
         MarkerOptions().position(globalLocation).title("")
+
+    private var toRemoveMarker = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -162,10 +164,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         })
 
         TrackingService.deleteLocation.observe(viewLifecycleOwner, Observer {
-            deleteMarker = it
-
-            //mMap?.clear()
-            //addAllAtOnce()
+            removeLocation()
         })
     }
 
@@ -174,14 +173,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             val loc = LatLng(location.latitude, location.longitude)
             val markerOptions =
                 MarkerOptions().position(loc).title(location.id)
-            markerList.add(markerOptions)
+            this.markerList.add(markerOptions)
         }
     }
 
     private fun addNewLocationToMap(lastLocation: LocationDomain) {
-        addNewMarker = true
-        globalLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
-        globalMarkerOptions = MarkerOptions().position(globalLocation).title(lastLocation.id)
+        this.addNewMarker = true
+        this.globalLocation = LatLng(lastLocation.latitude, lastLocation.longitude)
+        this.globalMarkerOptions = MarkerOptions().position(globalLocation).title(lastLocation.id)
+        this.markerList.add(globalMarkerOptions)
     }
 
     private fun updateTracking(isTracking: Boolean) {
@@ -192,6 +192,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         } else{
             binding.mDescText.text = Constants.Map.ANNOUNCE_TRACKING
         }
+    }
+
+    private fun removeLocation() {
+        this.toRemoveMarker = true
+        this.markerList.removeFirst()
     }
 
     override fun onDestroyView() {
@@ -214,6 +219,16 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         if(addNewMarker) {
             addMarker(globalLocation, globalMarkerOptions)
             addNewMarker = false
+        }
+
+        if(toRemoveMarker) {
+            mMap!!.clear()
+            for (marker in markerList) {
+                val location: LatLng = marker.position
+                val markerOptions: MarkerOptions = marker
+                addMarker(location, markerOptions)
+            }
+            toRemoveMarker = false
         }
 
     }
