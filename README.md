@@ -1,5 +1,6 @@
 # TRACK and SCAN
 Map Tracking and Bluetooth devices scan. <br/>
+<img src = "README images/icon-tns.png" height="300">
 
 ## Includes
 - Main activity with two Fragments: Map and Bluetooth. <br/>
