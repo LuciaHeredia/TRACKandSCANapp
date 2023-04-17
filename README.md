@@ -4,13 +4,16 @@ Map Tracking and Bluetooth devices scan. <br/>
 ## Includes
 - Main activity with two Fragments: Map and Bluetooth. <br/>
 - Navigation graph. <br/>
+- Data base: SQL Lite. <br/>
+- Map: Google Maps. <br/>
+- Background service. <br/>
 - Design pattern: MVVM <br/>
 
-## Screens:
+## Fragments Description:
 - Map: <br/>
 Running a background service(even if the app is closed). <br/>
 Tracking user's current location by google location service every 1 minute. <br/>
-Saves the last 20 locations in Data base(SQL Lite). <br/>
+Saves the last 20 locations in Data base. <br/>
 Displays the locations on a Google map. <br/>
 
 - Bluetooth: <br/>
