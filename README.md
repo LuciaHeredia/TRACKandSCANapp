@@ -20,7 +20,7 @@ Displays the locations on a Google map. <br/>
 Scans for Bluetooth devices and shows it in a Recyclerview. <br/>
 Ability to filter by MAC address. <br/>
 
-## App created with:
-* Android Studio, Kotlin.
+## Created with:
+* Android Studio: Kotlin.
 * Android version: 13
 * SDK version: 33
