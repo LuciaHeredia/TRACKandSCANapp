@@ -1,6 +1,6 @@
 # TRACK and SCAN
 Map Tracking and Bluetooth devices scan. <br/>
-<img src = "README images/icon-tns.png" height="300">
+<img src = "README images/icon-tns.png" height="300"> <br/>
 
 ## Includes
 - Main activity with two Fragments: Map and Bluetooth. <br/>
@@ -20,6 +20,9 @@ Displays the locations on a Google map. <br/>
 - Bluetooth: <br/>
 Scans for Bluetooth devices and shows it in a Recyclerview. <br/>
 Ability to filter by MAC address. <br/>
+
+<img src = "README images/maptrack.jpg" height="400"> <img src = "README images/bluescan.jpg" height="400"> <br/>
+
 
 ## Created with:
 * Android Studio: Kotlin.
